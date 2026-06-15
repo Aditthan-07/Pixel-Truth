@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Image Detector</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="scanner-line"></div>
+
+  <header>
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">PIXEL<strong>TRUTH</strong></span>
+    </div>
+    <p class="tagline">Is it real — or generated?</p>
+  </header>
+
+  <main>
+    <section class="upload-section">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-inner">
+          <div class="drop-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path d="M24 4L24 32M24 4L14 14M24 4L34 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 36V40C8 42.2 9.8 44 12 44H36C38.2 44 40 42.2 40 40V36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="drop-title">Drop an image to analyze</p>
+          <p class="drop-sub">or <label for="fileInput" class="file-label">browse files</label></p>
+          <p class="drop-formats">PNG · JPG · WEBP · GIF</p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" hidden />
+      </div>
+    </section>
+
+    <section class="result-section" id="resultSection" style="display:none">
+      <div class="result-card" id="resultCard">
+        <div class="result-header">
+          <div class="verdict" id="verdictBadge"></div>
+          <div class="confidence-block">
+            <span class="conf-label">Confidence</span>
+            <span class="conf-value" id="confValue"></span>
+          </div>
+        </div>
+
+        <div class="conf-bar-wrap">
+          <div class="conf-bar" id="confBar"></div>
+        </div>
+
+        <div class="images-grid">
+          <div class="img-block">
+            <p class="img-label">Original</p>
+            <img id="originalImg" src="" alt="Original" />
+          </div>
+          <div class="img-block">
+            <p class="img-label">Grad-CAM Analysis</p>
+            <img id="gradcamImg" src="" alt="Grad-CAM" />
+          </div>
+        </div>
+
+        <button class="reset-btn" id="resetBtn">Analyze another image</button>
+      </div>
+    </section>
+
+    <div class="loader" id="loader" style="display:none">
+      <div class="loader-ring"></div>
+      <p class="loader-text">Analyzing image patterns…</p>
+    </div>
+
+    <div class="error-box" id="errorBox" style="display:none">
+      <span class="error-icon">⚠</span>
+      <span id="errorMsg"></span>
+    </div>
+  </main>
+
+  <footer>
+    <p>Powered by <strong>Deep Learning</strong> · Transfer Learning · Grad-CAM Explainability</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
