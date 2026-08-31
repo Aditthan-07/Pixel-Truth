@@ -55,10 +55,18 @@ ai-image-detector/
 ├── static/
 │   └── uploads/            # Temporary image storage (git-ignored)
 ├── docs/
-│   └── GUIDE.md            # Usage guide
+│   ├── GUIDE.md            # Usage guide
+│   └── PAPER.md            # Research paper document
+├── PAPER.md                # Research paper specification & methodology
 ├── requirements.txt        # Python dependencies
 └── run.py                  # Entry point
 ```
+
+---
+
+## 📄 Research Paper
+Read the complete research paper detailing the dual-transformer architecture, vote-and-average fusion algorithm, and saliency explainability:
+👉 **[Read Paper (PAPER.md)](PAPER.md)**
 
 ---
 
