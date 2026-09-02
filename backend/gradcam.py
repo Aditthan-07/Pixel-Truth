@@ -5,7 +5,11 @@ from PIL import Image
 import base64
 import io
 
-def generate_gradcam(image: Image.Image, model_pipeline) -> str:
+def generate_gradcam(image: Image.Image, model_pipeline, alpha: int = 140) -> str:
+    """
+    Computes input-gradient saliency heatmap superimposed onto the original image.
+    Uses percentile contrast normalization and bicubic upsampling for clean visualization.
+    """
     try:
         model = model_pipeline.model
         processor = model_pipeline.feature_extractor if hasattr(model_pipeline, 'feature_extractor') else model_pipeline.image_processor
@@ -22,19 +26,28 @@ def generate_gradcam(image: Image.Image, model_pipeline) -> str:
         gradients = pixel_values.grad[0]
         pooled = gradients.mean(dim=[1, 2])
         weighted = (pixel_values[0] * pooled[:, None, None]).sum(dim=0)
-        heatmap = F.relu(weighted).detach().numpy()
+        heatmap = F.relu(weighted).detach().cpu().numpy()
 
         if heatmap.max() > 0:
-            heatmap = heatmap / heatmap.max()
+            # Robust percentile clipping for enhanced contrast
+            p99 = np.percentile(heatmap, 99)
+            if p99 > 0:
+                heatmap = np.clip(heatmap / p99, 0.0, 1.0)
+            else:
+                heatmap = heatmap / heatmap.max()
 
-        heatmap_resized = np.array(Image.fromarray((heatmap * 255).astype(np.uint8)).resize(image.size, Image.BILINEAR))
+        # Bicubic resampling produces smoother forensic overlays
+        heatmap_img = Image.fromarray((heatmap * 255).astype(np.uint8))
+        resample_filter = getattr(Image, 'Resampling', Image).BICUBIC
+        heatmap_resized = np.array(heatmap_img.resize(image.size, resample_filter))
+
         colormap = np.zeros((*heatmap_resized.shape, 3), dtype=np.uint8)
         colormap[:, :, 0] = heatmap_resized
         colormap[:, :, 1] = (255 - heatmap_resized)
-        colormap[:, :, 2] = 100
+        colormap[:, :, 2] = 80
 
         overlay = Image.fromarray(colormap).convert("RGBA")
-        overlay.putalpha(160)
+        overlay.putalpha(max(0, min(255, alpha)))
         base = image.convert("RGBA")
         combined = Image.alpha_composite(base, overlay).convert("RGB")
 
