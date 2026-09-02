@@ -12,10 +12,29 @@ from model.detector import predict, load_models, _models
 from backend.gradcam import generate_gradcam
 
 app = Flask(__name__, static_folder='../frontend')
+app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB limit
 CORS(app)
+
+# Prevent decompression bomb attacks
+Image.MAX_IMAGE_PIXELS = 50_000_000
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'no-referrer'
+    return response
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        'status': 'healthy',
+        'service': 'PixelTruth AI Image Detector',
+        'models_loaded': len(_models) > 0
+    }), 200
 
 @app.route('/')
 def index():
@@ -35,12 +54,16 @@ def predict_route():
         return jsonify({'error': 'No file selected'}), 400
 
     allowed = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
-    ext = file.filename.rsplit('.', 1)[-1].lower()
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
     if ext not in allowed:
         return jsonify({'error': 'Unsupported file type. Use PNG, JPG, WEBP, or GIF'}), 400
 
     try:
+        image = Image.open(file.stream)
+        image.verify()  # Validate image integrity
+        file.stream.seek(0)
         image = Image.open(file.stream).convert('RGB')
+
         label, confidence = predict(image)
 
         model_pipeline = next(iter(_models.values())) if _models else None
