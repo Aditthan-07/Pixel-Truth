@@ -1,12 +1,13 @@
-﻿import unittest
+import re
+import unittest
 import numpy as np
 from PIL import Image
 
 def normalize_label(label: str) -> str:
-    l = label.lower()
-    if any(k in l for k in ('artificial', 'ai', 'fake')):
+    tokens = set(re.findall(r'[a-z0-9]+', label.lower()))
+    if any(k in tokens for k in ('artificial', 'ai', 'fake')):
         return 'AI-Generated'
-    if any(k in l for k in ('human', 'real', 'photo')):
+    if any(k in tokens for k in ('human', 'real', 'photo')):
         return 'Real-Image'
     return label
 
@@ -73,6 +74,18 @@ class TestPixelTruthFusion(unittest.TestCase):
         ]
         label, conf = vote_and_average_fusion(outputs)
         self.assertEqual(label, "AI-Generated")
+
+    def test_tie_break_equal_confidence(self):
+        outputs = [
+            [{'label': 'ai', 'score': 0.5}],
+            [{'label': 'real', 'score': 0.5}]
+        ]
+        label, conf = vote_and_average_fusion(outputs)
+        self.assertEqual(label, "AI-Generated")
+
+    def test_label_punctuation_and_casing(self):
+        self.assertEqual(normalize_label("FAKE-ARTWORK!"), "AI-Generated")
+        self.assertEqual(normalize_label("Photo/Realistic"), "Real-Image")
 
     def test_synthetic_image_tensor_creation(self):
         img_arr = np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)

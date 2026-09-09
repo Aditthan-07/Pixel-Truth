@@ -1,3 +1,4 @@
+import re
 from transformers import pipeline
 from PIL import Image
 
@@ -7,6 +8,15 @@ MODELS = [
     "umm-maybe/AI-image-detector",
     "Organika/sdxl-detector",
 ]
+
+def normalize_label(label: str) -> str:
+    """Normalize raw label strings across disparate models into consistent target buckets."""
+    tokens = set(re.findall(r'[a-z0-9]+', label.lower()))
+    if any(k in tokens for k in ('artificial', 'ai', 'fake')):
+        return 'AI-Generated'
+    if any(k in tokens for k in ('human', 'real', 'photo')):
+        return 'Real-Image'
+    return label
 
 def load_models():
     global _models
@@ -25,14 +35,15 @@ def predict(image: Image.Image):
     for model_id, model in _models.items():
         results = model(image)
         for item in results:
-            raw = item["label"].lower()
-            if "artificial" in raw or "ai" in raw or "fake" in raw:
-                ai_total += item["score"]
-                if item["score"] > 0.5:
+            bucket = normalize_label(item["label"])
+            score = item["score"]
+            if bucket == 'AI-Generated':
+                ai_total += score
+                if score > 0.5:
                     ai_votes += 1
-            elif "human" in raw or "real" in raw or "photo" in raw:
-                real_total += item["score"]
-                if item["score"] > 0.5:
+            elif bucket == 'Real-Image':
+                real_total += score
+                if score > 0.5:
                     real_votes += 1
 
     n = len(_models)

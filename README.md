@@ -6,6 +6,7 @@
 ![Flask](https://img.shields.io/badge/Flask-2.x-000000?style=for-the-badge&logo=flask&logoColor=white)
 ![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+[![PixelTruth CI](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/ci.yml/badge.svg)](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/ci.yml)
 
 **A Deep Learning web app that detects whether an image is a real photograph or AI-generated — with visual explainability via Grad-CAM.**
 
@@ -40,7 +41,7 @@ Upload an image → Get verdict (Real / AI Generated) → View Grad-CAM heatmap
 ## Project Structure
 
 ```
-ai-image-detector/
+Pixel-Truth/
 ├── model/
 │   ├── __init__.py
 │   └── detector.py         # HuggingFace model loader & ensemble inference
@@ -95,8 +96,8 @@ Read the complete research paper detailing the dual-transformer architecture, vo
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/Aditthan-07/ai-image-detector.git
-cd ai-image-detector
+git clone https://github.com/Aditthan-07/Pixel-Truth.git
+cd Pixel-Truth
 ```
 
 **2. Create a virtual environment (recommended)**
