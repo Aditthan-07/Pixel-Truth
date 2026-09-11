@@ -1,5 +1,4 @@
 import re
-from transformers import pipeline
 from PIL import Image
 
 _models = {}
@@ -20,6 +19,7 @@ def normalize_label(label: str) -> str:
 
 def load_models():
     global _models
+    from transformers import pipeline
     for model_id in MODELS:
         if model_id not in _models:
             _models[model_id] = pipeline("image-classification", model=model_id)

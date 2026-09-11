@@ -9,7 +9,6 @@ import base64
 import io
 
 from model.detector import predict, load_models, _models
-from backend.gradcam import generate_gradcam
 
 app = Flask(__name__, static_folder='../frontend')
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB limit
@@ -67,7 +66,11 @@ def predict_route():
         label, confidence = predict(image)
 
         model_pipeline = next(iter(_models.values())) if _models else None
-        gradcam_b64 = generate_gradcam(image, model_pipeline) if model_pipeline else ""
+        if model_pipeline:
+            from backend.gradcam import generate_gradcam
+            gradcam_b64 = generate_gradcam(image, model_pipeline)
+        else:
+            gradcam_b64 = ""
 
         buf = io.BytesIO()
         image.save(buf, format='PNG')
