@@ -144,6 +144,16 @@ python cli.py path/to/image.png --output overlay.png
 python cli.py path/to/image.jpg --json
 ```
 
+### Running with Docker
+
+You can also run PixelTruth in an isolated container using Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Then visit **http://localhost:5000**.
+
 ---
 
 ## How It Works
