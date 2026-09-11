@@ -9,13 +9,14 @@ import base64
 import io
 
 from model.detector import predict, load_models, _models
+from backend.config import Config
 
 app = Flask(__name__, static_folder='../frontend')
-app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB limit
+app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 CORS(app)
 
 # Prevent decompression bomb attacks
-Image.MAX_IMAGE_PIXELS = 50_000_000
+Image.MAX_IMAGE_PIXELS = Config.MAX_IMAGE_PIXELS
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -52,7 +53,7 @@ def predict_route():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
 
-    allowed = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+    allowed = Config.ALLOWED_EXTENSIONS
     ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
     if ext not in allowed:
         return jsonify({'error': 'Unsupported file type. Use PNG, JPG, WEBP, or GIF'}), 400
