@@ -25,6 +25,7 @@ PixelTruth uses an ensemble of two pre-trained Vision Transformer (ViT) models f
 - **Dual-Model Ensemble** — Combines `umm-maybe/AI-image-detector` and `Organika/sdxl-detector` for more reliable predictions via majority voting
 - **Grad-CAM Explainability** — Visual heatmap overlay showing which parts of the image triggered the AI detection
 - **Drag & Drop UI** — Clean, modern frontend supporting PNG, JPG, WEBP, and GIF
+- **Terminal CLI & JSON Mode** — Standalone CLI supporting formatted console output, overlay export, and machine-readable JSON
 - **REST API Backend** — Flask API with CORS support, easily extendable
 - **Zero Setup Models** — Models auto-download from Hugging Face on first run
 
@@ -127,6 +128,21 @@ python run.py
 Then open **http://localhost:5000** in your browser.
 
 > **Note:** On first run, the two models (~300MB total) will download automatically from Hugging Face. This is a one-time process.
+
+### Command-Line Interface (CLI)
+
+PixelTruth also includes a standalone CLI for batch scripts and headless workflows:
+
+```bash
+# Analyze an image in the terminal
+python cli.py path/to/image.jpg
+
+# Save the visual Grad-CAM heatmap overlay to disk
+python cli.py path/to/image.png --output overlay.png
+
+# Output machine-readable JSON for integration into pipelines
+python cli.py path/to/image.jpg --json
+```
 
 ---
 
