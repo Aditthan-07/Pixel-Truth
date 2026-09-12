@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 import io
 from backend.app import app
 
@@ -42,6 +42,14 @@ class TestPixelTruthAPI(unittest.TestCase):
         res_json = response.get_json()
         self.assertIn('error', res_json)
         self.assertIn('Unsupported file type', res_json['error'])
+
+    def test_predict_corrupted_image(self):
+        data = {'image': (io.BytesIO(b'not an actual image file'), 'test.png')}
+        response = self.client.post('/predict', data=data, content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 500)
+        res_json = response.get_json()
+        self.assertIn('error', res_json)
+        self.assertIn('Prediction failed', res_json['error'])
 
 if __name__ == '__main__':
     unittest.main()

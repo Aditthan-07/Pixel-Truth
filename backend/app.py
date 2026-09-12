@@ -10,6 +10,7 @@ import io
 
 from model.detector import predict, load_models, _models
 from backend.config import Config
+from backend.utils import is_allowed_extension, sanitize_and_prepare_image
 
 app = Flask(__name__, static_folder='../frontend')
 app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
@@ -53,16 +54,11 @@ def predict_route():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
 
-    allowed = Config.ALLOWED_EXTENSIONS
-    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
-    if ext not in allowed:
+    if not is_allowed_extension(file.filename, Config.ALLOWED_EXTENSIONS):
         return jsonify({'error': 'Unsupported file type. Use PNG, JPG, WEBP, or GIF'}), 400
 
     try:
-        image = Image.open(file.stream)
-        image.verify()  # Validate image integrity
-        file.stream.seek(0)
-        image = Image.open(file.stream).convert('RGB')
+        image = sanitize_and_prepare_image(file.read())
 
         label, confidence = predict(image)
 
