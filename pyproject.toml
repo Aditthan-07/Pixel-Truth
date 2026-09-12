@@ -1,0 +1,26 @@
+﻿[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pixeltruth"
+version = "1.0.0"
+description = "Dual-Transformer AI Image Detector with Grad-CAM Explainability"
+readme = "README.md"
+authors = [
+    { name = "Aditthan J K", email = "aditthanjeganathan067@gmail.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "flask>=2.0.0",
+    "flask-cors>=3.0.0",
+    "transformers>=4.20.0",
+    "torch>=1.12.0",
+    "torchvision>=0.13.0",
+    "pillow>=9.0.0",
+    "numpy>=1.20.0",
+]
+
+[project.scripts]
+pixeltruth = "cli:run_cli"

@@ -170,6 +170,21 @@ make run                 # Linux / macOS
 .\scripts\dev.ps1 run    # Windows
 ```
 
+### Python SDK Usage
+
+You can also integrate PixelTruth directly into your Python scripts or Jupyter notebooks:
+
+```python
+from pixeltruth import PixelTruthDetector
+
+detector = PixelTruthDetector()
+result = detector.predict("path/to/image.jpg")
+
+print(f"Verdict: {result.label} ({result.confidence}%)")
+if result.is_ai:
+    print("Warning: Image contains synthetic AI artifacts.")
+```
+
 ---
 
 ## How It Works
