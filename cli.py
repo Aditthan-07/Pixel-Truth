@@ -24,13 +24,89 @@ Examples:
   python cli.py path/to/image.jpg --json
         """
     )
-    parser.add_argument("image", help="Path to the input image file")
+    parser.add_argument("image", nargs="?", help="Path to input image file (optional if --batch is used)", default=None)
+    parser.add_argument("--batch", "-b", help="Directory of images to process in batch mode", default=None)
     parser.add_argument("--output", "-o", help="Optional path to save the saliency overlay image", default=None)
     parser.add_argument("--json", action="store_true", help="Output results in JSON format")
     parser.add_argument("--verbose", "-v", action="store_true", help="Print detailed model confidence info")
 
     args = parser.parse_args()
 
+    if not args.image and not args.batch:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    from model.detector import predict, _models
+
+    # Batch directory processing
+    if args.batch:
+        if not os.path.isdir(args.batch):
+            msg = f"Directory not found: {args.batch}"
+            if args.json:
+                print(json.dumps({"error": msg}), file=sys.stderr)
+            else:
+                print(f"[ERROR] {msg}", file=sys.stderr)
+            sys.exit(1)
+
+        allowed_exts = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
+        image_files = [
+            os.path.join(args.batch, f) for f in sorted(os.listdir(args.batch))
+            if f.lower().endswith(allowed_exts)
+        ]
+
+        if not image_files:
+            msg = f"No supported images found in directory: {args.batch}"
+            if args.json:
+                print(json.dumps({"error": msg}), file=sys.stderr)
+            else:
+                print(f"[ERROR] {msg}", file=sys.stderr)
+            sys.exit(1)
+
+        results = []
+        ai_count, real_count = 0, 0
+        if not args.json:
+            print(f"[*] Processing {len(image_files)} images from: {args.batch} ...\n")
+
+        for img_path in image_files:
+            try:
+                img = Image.open(img_path).convert('RGB')
+                lbl, conf = predict(img)
+                if lbl == "AI-Generated":
+                    ai_count += 1
+                else:
+                    real_count += 1
+                results.append({
+                    "file": os.path.basename(img_path),
+                    "verdict": lbl,
+                    "confidence": conf
+                })
+                if not args.json:
+                    badge = "[AI]" if lbl == "AI-Generated" else "[REAL]"
+                    print(f"  {badge:6} {os.path.basename(img_path):<30} {conf:.2f}%")
+            except Exception as err:
+                results.append({
+                    "file": os.path.basename(img_path),
+                    "error": str(err)
+                })
+
+        if args.json:
+            payload = {
+                "batch_dir": args.batch,
+                "total": len(image_files),
+                "ai_generated": ai_count,
+                "real_images": real_count,
+                "results": results
+            }
+            print(json.dumps(payload, indent=2))
+        else:
+            print("\n" + "=" * 45)
+            print(f"  Total Processed : {len(image_files)}")
+            print(f"  AI Generated    : {ai_count}")
+            print(f"  Real Images     : {real_count}")
+            print("=" * 45)
+        return
+
+    # Single image processing
     if not os.path.exists(args.image):
         if args.json:
             print(json.dumps({"error": f"File not found: {args.image}"}), file=sys.stderr)
@@ -51,7 +127,6 @@ Examples:
         print(f"[*] Analyzing image: {os.path.basename(args.image)} ...")
 
     try:
-        from model.detector import predict, _models
         label, confidence = predict(image)
     except Exception as e:
         if args.json:

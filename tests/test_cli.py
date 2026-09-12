@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 import subprocess
 import sys
 import json
@@ -35,6 +35,24 @@ class TestPixelTruthCLI(unittest.TestCase):
         data = json.loads(result.stderr.strip())
         self.assertIn("error", data)
         self.assertIn("File not found", data["error"])
+
+    def test_cli_batch_missing_directory(self):
+        result = subprocess.run(
+            [sys.executable, "cli.py", "--batch", "nonexistent_dir_xyz"],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Directory not found", result.stderr)
+
+    def test_cli_no_args_shows_help(self):
+        result = subprocess.run(
+            [sys.executable, "cli.py"],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("usage: cli.py", result.stderr)
 
 if __name__ == '__main__':
     unittest.main()
