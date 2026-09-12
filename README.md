@@ -7,6 +7,8 @@
 ![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
 [![PixelTruth CI](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/ci.yml/badge.svg)](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/ci.yml)
+[![Lint & Code Quality](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/lint.yml/badge.svg)](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/lint.yml)
+[![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)](docs/openapi.yaml)
 
 **A Deep Learning web app that detects whether an image is a real photograph or AI-generated — with visual explainability via Grad-CAM.**
 
@@ -154,6 +156,20 @@ docker compose up --build
 
 Then visit **http://localhost:5000**.
 
+### Development Task Runner
+
+Common tasks can be executed via `make` or PowerShell:
+
+```bash
+# Run the test suite
+make test                # Linux / macOS
+.\scripts\dev.ps1 test   # Windows
+
+# Start development server
+make run                 # Linux / macOS
+.\scripts\dev.ps1 run    # Windows
+```
+
 ---
 
 ## How It Works
@@ -223,7 +239,11 @@ Body: image=<file>
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
+Contributions are welcome! Please review our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) prior to opening a pull request.
+
+For reporting security vulnerabilities, please refer to our [Security Policy](SECURITY.md).
+
+For complete REST API contract specifications, view the [OpenAPI 3.0 Documentation](docs/openapi.yaml).
 
 ---
 
