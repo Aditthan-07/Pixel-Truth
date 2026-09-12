@@ -1,0 +1,96 @@
+﻿openapi: 3.0.3
+info:
+  title: PixelTruth REST API
+  description: Dual-Transformer ensemble for AI-generated image detection and Grad-CAM saliency explainability.
+  version: 1.0.0
+  contact:
+    name: Aditthan J K
+    email: aditthanjeganathan067@gmail.com
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Service Health Check
+      description: Returns the status of the service and whether deep learning models are cached in memory.
+      responses:
+        '200':
+          description: Service is healthy and operational.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: PixelTruth AI Image Detector
+                  models_loaded:
+                    type: boolean
+                    example: true
+
+  /predict:
+    post:
+      summary: Analyze and Classify Image
+      description: Classifies an uploaded image as real or AI-generated using an ensemble of ViT and Swin models with a Grad-CAM overlay.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The image file to analyze (PNG, JPG, JPEG, WEBP, or GIF).
+      responses:
+        '200':
+          description: Successful prediction verdict with confidence and explainability heatmap.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    enum: [AI-Generated, Real-Image]
+                    example: AI-Generated
+                  confidence:
+                    type: number
+                    format: float
+                    example: 89.42
+                  gradcam_image:
+                    type: string
+                    description: Base64-encoded PNG image with saliency heatmap overlay.
+                    example: data:image/png;base64,iVBORw0KGgo...
+                  original_image:
+                    type: string
+                    description: Base64-encoded PNG representation of the input image.
+                    example: data:image/png;base64,iVBORw0KGgo...
+        '400':
+          description: Invalid request payload (missing file, empty filename, or unsupported file extension).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unsupported file type. Use PNG, JPG, WEBP, or GIF
+        '500':
+          description: Internal processing or inference failure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Prediction failed
