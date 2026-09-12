@@ -50,6 +50,26 @@ function showError(msg) {
   errorMsg.textContent = msg;
 }
 
+// Clipboard paste support
+window.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) handleFile(file);
+      break;
+    }
+  }
+});
+
+// Escape key to reset
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && resultSection.style.display !== 'none') {
+    resetBtn.click();
+  }
+});
+
 async function handleFile(file) {
   const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
   if (!allowed.includes(file.type)) {
@@ -66,7 +86,8 @@ async function handleFile(file) {
   formData.append('image', file);
 
   try {
-    const res = await fetch('http://localhost:5000/predict', {
+    const endpoint = window.location.origin.startsWith('http') ? '/predict' : 'http://localhost:5000/predict';
+    const res = await fetch(endpoint, {
       method: 'POST',
       body: formData
     });
