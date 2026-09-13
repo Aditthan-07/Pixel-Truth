@@ -8,6 +8,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
 [![PixelTruth CI](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/ci.yml/badge.svg)](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/ci.yml)
 [![Lint & Code Quality](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/lint.yml/badge.svg)](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/lint.yml)
+[![Code Coverage](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/coverage.yml/badge.svg)](https://github.com/Aditthan-07/Pixel-Truth/actions/workflows/coverage.yml)
 [![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)](docs/openapi.yaml)
 
 **A Deep Learning web app that detects whether an image is a real photograph or AI-generated — with visual explainability via Grad-CAM.**
@@ -24,12 +25,14 @@ PixelTruth uses an ensemble of two pre-trained Vision Transformer (ViT) models f
 
 ## Features
 
-- **Dual-Model Ensemble** — Combines `umm-maybe/AI-image-detector` and `Organika/sdxl-detector` for more reliable predictions via majority voting
-- **Grad-CAM Explainability** — Visual heatmap overlay showing which parts of the image triggered the AI detection
-- **Drag & Drop UI** — Clean, modern frontend supporting PNG, JPG, WEBP, and GIF
-- **Terminal CLI & JSON Mode** — Standalone CLI supporting formatted console output, overlay export, and machine-readable JSON
-- **REST API Backend** — Flask API with CORS support, easily extendable
-- **Zero Setup Models** — Models auto-download from Hugging Face on first run
+- **Dual-Model Ensemble** — Combines `umm-maybe/AI-image-detector` (ViT) and `Organika/sdxl-detector` (Swin) for reliable cross-architecture predictions
+- **Grad-CAM Explainability** — Visual heatmap overlay with percentile contrast normalization and configurable colormaps (`thermal`, `coolwarm`, `fire`)
+- **Metadata & EXIF Forensics** — Inspects camera hardware tags (Make/Model) and detects generative prompt signatures in PNG/JPEG metadata
+- **2D Fourier FFT Analysis** — Analyzes radial power spectrums to spot generative upsampling grid anomalies
+- **Terminal CLI & Batch Mode** — Process individual images or entire directories with JSON exports
+- **Python SDK Package** — Programmatic `PixelTruthDetector` class for direct script and notebook integration
+- **Modern Web UI** — Drag-and-drop interface with clipboard paste (`Ctrl+V`) and 1-click JSON report export
+- **REST API Backend** — Flask API with CORS, security headers, and OpenAPI 3.0 specification
 
 ---
 
@@ -183,6 +186,14 @@ result = detector.predict("path/to/image.jpg")
 print(f"Verdict: {result.label} ({result.confidence}%)")
 if result.is_ai:
     print("Warning: Image contains synthetic AI artifacts.")
+```
+
+### Forensic Benchmark Evaluation
+
+Evaluate detector accuracy, precision, recall, and F1-score across ground-truth dataset folders:
+
+```bash
+python scripts/benchmark.py --real-dir ./data/real --ai-dir ./data/ai --output report.json
 ```
 
 ---
