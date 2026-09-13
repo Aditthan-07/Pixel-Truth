@@ -1,4 +1,4 @@
-﻿openapi: 3.0.3
+openapi: 3.0.3
 info:
   title: PixelTruth REST API
   description: Dual-Transformer ensemble for AI-generated image detection and Grad-CAM saliency explainability.
@@ -74,6 +74,31 @@ paths:
                     type: string
                     description: Base64-encoded PNG representation of the input image.
                     example: data:image/png;base64,iVBORw0KGgo...
+                  metadata_forensics:
+                    type: object
+                    description: Extracted camera hardware and generative prompt metadata.
+                    properties:
+                      has_exif:
+                        type: boolean
+                        example: true
+                      has_camera_data:
+                        type: boolean
+                        example: false
+                      camera_make:
+                        type: string
+                        nullable: true
+                        example: null
+                      camera_model:
+                        type: string
+                        nullable: true
+                        example: null
+                      ai_metadata_detected:
+                        type: boolean
+                        example: true
+                      ai_software_tag:
+                        type: string
+                        nullable: true
+                        example: parameters
         '400':
           description: Invalid request payload (missing file, empty filename, or unsupported file extension).
           content:
@@ -94,3 +119,50 @@ paths:
                   error:
                     type: string
                     example: Prediction failed
+
+  /inspect/metadata:
+    post:
+      summary: Inspect Image Metadata & Generative Signatures
+      description: Fast extraction of EXIF tags and PNG generation parameters without neural network inference.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The image file to inspect.
+      responses:
+        '200':
+          description: Forensic metadata report.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_exif:
+                    type: boolean
+                  has_camera_data:
+                    type: boolean
+                  camera_make:
+                    type: string
+                    nullable: true
+                  camera_model:
+                    type: string
+                    nullable: true
+                  ai_metadata_detected:
+                    type: boolean
+                  ai_software_tag:
+                    type: string
+                    nullable: true
+                  raw_text_chunks:
+                    type: object
+        '400':
+          description: Missing file or invalid format.
+        '500':
+          description: Parsing error.
