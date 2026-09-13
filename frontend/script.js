@@ -11,6 +11,10 @@ const confBar = document.getElementById('confBar');
 const originalImg = document.getElementById('originalImg');
 const gradcamImg = document.getElementById('gradcamImg');
 const resetBtn = document.getElementById('resetBtn');
+const metadataBanner = document.getElementById('metadataBanner');
+const metadataText = document.getElementById('metadataText');
+const exportBtn = document.getElementById('exportBtn');
+let currentPrediction = null;
 
 dropZone.addEventListener('click', (e) => {
   if (e.target.tagName === 'LABEL' || e.target.closest('label')) return;
@@ -38,10 +42,23 @@ fileInput.addEventListener('change', () => {
 resetBtn.addEventListener('click', () => {
   resultSection.style.display = 'none';
   errorBox.style.display = 'none';
+  if (metadataBanner) metadataBanner.style.display = 'none';
   dropZone.parentElement.style.display = 'block';
   fileInput.value = '';
   resultCard.className = 'result-card';
   confBar.style.width = '0%';
+  currentPrediction = null;
+});
+
+exportBtn.addEventListener('click', () => {
+  if (!currentPrediction) return;
+  const blob = new Blob([JSON.stringify(currentPrediction, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pixeltruth_forensic_report.json';
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 function showError(msg) {
@@ -113,6 +130,19 @@ async function handleFile(file) {
 
     originalImg.src = `data:image/png;base64,${data.original_image}`;
     gradcamImg.src = `data:image/png;base64,${data.gradcam_image}`;
+
+    currentPrediction = data;
+    if (metadataBanner && metadataText) {
+      if (data.metadata_forensics?.ai_metadata_detected) {
+        metadataBanner.style.display = 'block';
+        metadataText.innerHTML = `⚠️ <strong>Generative AI Signature:</strong> Found tag <code>${data.metadata_forensics.ai_software_tag || 'AI Software'}</code>`;
+      } else if (data.metadata_forensics?.has_camera_data) {
+        metadataBanner.style.display = 'block';
+        metadataText.innerHTML = `📷 <strong>Hardware Camera Info:</strong> ${data.metadata_forensics.camera_make || ''} ${data.metadata_forensics.camera_model || ''}`;
+      } else {
+        metadataBanner.style.display = 'none';
+      }
+    }
 
     resultSection.style.display = 'block';
 
