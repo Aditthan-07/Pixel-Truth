@@ -1,16 +1,36 @@
 import numpy as np
-import torch
-import torch.nn.functional as F
 from PIL import Image
 import base64
 import io
 
-def generate_gradcam(image: Image.Image, model_pipeline, alpha: int = 140) -> str:
+def apply_colormap(heatmap: np.ndarray, style: str = 'thermal') -> np.ndarray:
+    """Applies a 3-channel RGB colormap to a 2D normalized heatmap [0, 255]."""
+    h = heatmap.astype(np.float32) / 255.0
+    cmap = np.zeros((*heatmap.shape, 3), dtype=np.uint8)
+
+    if style == 'coolwarm':
+        cmap[:, :, 0] = (h * 255).astype(np.uint8)
+        cmap[:, :, 1] = ((1.0 - np.abs(h - 0.5) * 2) * 180).astype(np.uint8)
+        cmap[:, :, 2] = ((1.0 - h) * 255).astype(np.uint8)
+    elif style == 'fire':
+        cmap[:, :, 0] = np.clip(h * 2.0 * 255, 0, 255).astype(np.uint8)
+        cmap[:, :, 1] = np.clip((h - 0.4) * 2.5 * 255, 0, 255).astype(np.uint8)
+        cmap[:, :, 2] = 20
+    else:  # 'thermal' (default)
+        cmap[:, :, 0] = heatmap
+        cmap[:, :, 1] = (255 - heatmap)
+        cmap[:, :, 2] = 80
+
+    return cmap
+
+def generate_gradcam(image: Image.Image, model_pipeline, alpha: int = 140, colormap: str = 'thermal') -> str:
     """
     Computes input-gradient saliency heatmap superimposed onto the original image.
-    Uses percentile contrast normalization and bicubic upsampling for clean visualization.
+    Uses percentile contrast normalization, bicubic upsampling, and configurable colormaps.
     """
     try:
+        import torch
+        import torch.nn.functional as F
         model = model_pipeline.model
         processor = model_pipeline.feature_extractor if hasattr(model_pipeline, 'feature_extractor') else model_pipeline.image_processor
 
@@ -41,12 +61,8 @@ def generate_gradcam(image: Image.Image, model_pipeline, alpha: int = 140) -> st
         resample_filter = getattr(Image, 'Resampling', Image).BICUBIC
         heatmap_resized = np.array(heatmap_img.resize(image.size, resample_filter))
 
-        colormap = np.zeros((*heatmap_resized.shape, 3), dtype=np.uint8)
-        colormap[:, :, 0] = heatmap_resized
-        colormap[:, :, 1] = (255 - heatmap_resized)
-        colormap[:, :, 2] = 80
-
-        overlay = Image.fromarray(colormap).convert("RGBA")
+        colored = apply_colormap(heatmap_resized, style=colormap)
+        overlay = Image.fromarray(colored).convert("RGBA")
         overlay.putalpha(max(0, min(255, alpha)))
         base = image.convert("RGBA")
         combined = Image.alpha_composite(base, overlay).convert("RGB")
