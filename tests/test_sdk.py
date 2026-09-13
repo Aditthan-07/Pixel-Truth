@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 from pixeltruth import PredictionResult, PixelTruthDetector
 
 class TestPixelTruthSDK(unittest.TestCase):
@@ -14,6 +14,19 @@ class TestPixelTruthSDK(unittest.TestCase):
         res = PredictionResult(label='Real-Image', confidence=95.2)
         self.assertFalse(res.is_ai)
         self.assertTrue(res.is_real)
+
+    def test_prediction_result_with_forensics(self):
+        meta = {'ai_metadata_detected': True, 'camera_make': None}
+        freq = {'high_freq_energy_ratio': 0.1234}
+        res = PredictionResult(
+            label='AI-Generated',
+            confidence=91.0,
+            metadata=meta,
+            frequency_metrics=freq
+        )
+        d = res.to_dict()
+        self.assertEqual(d['metadata'], meta)
+        self.assertEqual(d['frequency_metrics'], freq)
 
     def test_detector_missing_file_raises(self):
         detector = PixelTruthDetector()
