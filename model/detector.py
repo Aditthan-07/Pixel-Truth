@@ -18,7 +18,6 @@ def normalize_label(label: str) -> str:
     return label
 
 def load_models():
-    global _models
     from transformers import pipeline
     for model_id in MODELS:
         if model_id not in _models:
