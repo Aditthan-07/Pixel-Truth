@@ -51,5 +51,24 @@ class TestPixelTruthAPI(unittest.TestCase):
         self.assertIn('error', res_json)
         self.assertIn('Prediction failed', res_json['error'])
 
+    def test_inspect_metadata_success(self):
+        from PIL import Image
+        img = Image.new('RGB', (40, 40), color='red')
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+
+        data = {'image': (buf, 'test.png')}
+        response = self.client.post('/inspect/metadata', data=data, content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 200)
+        res_json = response.get_json()
+        self.assertIn('has_exif', res_json)
+        self.assertIn('ai_metadata_detected', res_json)
+
+    def test_inspect_metadata_missing_file(self):
+        response = self.client.post('/inspect/metadata', data={})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('No image file provided', response.get_json().get('error', ''))
+
 if __name__ == '__main__':
     unittest.main()

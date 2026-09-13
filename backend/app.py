@@ -11,6 +11,7 @@ import io
 from model.detector import predict, load_models, _models
 from backend.config import Config
 from backend.utils import is_allowed_extension, sanitize_and_prepare_image
+from backend.exif_inspector import inspect_image_metadata
 
 app = Flask(__name__, static_folder='../frontend')
 app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
@@ -58,7 +59,9 @@ def predict_route():
         return jsonify({'error': 'Unsupported file type. Use PNG, JPG, WEBP, or GIF'}), 400
 
     try:
-        image = sanitize_and_prepare_image(file.read())
+        raw_bytes = file.read()
+        metadata = inspect_image_metadata(raw_bytes)
+        image = sanitize_and_prepare_image(raw_bytes)
 
         label, confidence = predict(image)
 
@@ -77,8 +80,28 @@ def predict_route():
             'label': label,
             'confidence': confidence,
             'gradcam_image': gradcam_b64,
-            'original_image': original_b64
+            'original_image': original_b64,
+            'metadata_forensics': metadata
         })
 
     except Exception as e:
         return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+
+@app.route('/inspect/metadata', methods=['POST'])
+def inspect_metadata_route():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if not is_allowed_extension(file.filename, Config.ALLOWED_EXTENSIONS):
+        return jsonify({'error': 'Unsupported file type. Use PNG, JPG, WEBP, or GIF'}), 400
+
+    try:
+        raw_bytes = file.read()
+        metadata = inspect_image_metadata(raw_bytes)
+        return jsonify(metadata), 200
+    except Exception as e:
+        return jsonify({'error': f'Inspection failed: {str(e)}'}), 500
