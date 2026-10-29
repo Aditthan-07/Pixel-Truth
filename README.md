@@ -90,25 +90,111 @@ Read the complete research paper detailing the dual-transformer architecture, vo
 
 ---
 
-## 🚀 Quick Start
+## Getting Started
 
-1. **Clone the repository:**
-   `ash
-   git clone https://github.com/Aditthan-07/Pixel-Truth.git
-   cd Pixel-Truth
-   `
+### Prerequisites
 
-2. **Install dependencies:**
-   `ash
-   pip install -r requirements.txt
-   `
+- Python 3.9 or higher
+- pip
 
-3. **Start the application:**
-   `ash
-   python run.py
-   `
+### Installation
 
-   Open **http://localhost:5000** in your browser.
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/Aditthan-07/Pixel-Truth.git
+cd Pixel-Truth
+```
+
+**2. Create a virtual environment (recommended)**
+
+```bash
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+**3. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+### Running the App
+
+```bash
+python run.py
+```
+
+Then open **http://localhost:5000** in your browser.
+
+> **Note:** On first run, the two models (~300MB total) will download automatically from Hugging Face. This is a one-time process.
+
+### Command-Line Interface (CLI)
+
+PixelTruth also includes a standalone CLI for batch scripts and headless workflows:
+
+```bash
+# Analyze an image in the terminal
+python cli.py path/to/image.jpg
+
+# Save the visual Grad-CAM heatmap overlay to disk
+python cli.py path/to/image.png --output overlay.png
+
+# Output machine-readable JSON for integration into pipelines
+python cli.py path/to/image.jpg --json
+```
+
+### Running with Docker
+
+You can also run PixelTruth in an isolated container using Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Then visit **http://localhost:5000**.
+
+### Development Task Runner
+
+Common tasks can be executed via `make` or PowerShell:
+
+```bash
+# Run the test suite
+make test                # Linux / macOS
+.\scripts\dev.ps1 test   # Windows
+
+# Start development server
+make run                 # Linux / macOS
+.\scripts\dev.ps1 run    # Windows
+```
+
+### Python SDK Usage
+
+You can also integrate PixelTruth directly into your Python scripts or Jupyter notebooks:
+
+```python
+from pixeltruth import PixelTruthDetector
+
+detector = PixelTruthDetector()
+result = detector.predict("path/to/image.jpg")
+
+print(f"Verdict: {result.label} ({result.confidence}%)")
+if result.is_ai:
+    print("Warning: Image contains synthetic AI artifacts.")
+```
+
+### Forensic Benchmark Evaluation
+
+Evaluate detector accuracy, precision, recall, and F1-score across ground-truth dataset folders:
+
+```bash
+python scripts/benchmark.py --real-dir ./data/real --ai-dir ./data/ai --output report.json
+```
 
 ---
 
