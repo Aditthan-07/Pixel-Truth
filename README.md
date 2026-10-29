@@ -36,6 +36,60 @@ PixelTruth uses an ensemble of two pre-trained Vision Transformer (ViT) models f
 
 ---
 
+## Demo
+
+```
+Upload an image → Get verdict (Real / AI Generated) → View Grad-CAM heatmap
+```
+
+---
+
+## Project Structure
+
+```
+Pixel-Truth/
+├── model/
+│   ├── __init__.py
+│   └── detector.py         # HuggingFace model loader & ensemble inference
+├── backend/
+│   ├── __init__.py
+│   ├── app.py              # Flask REST API & routes
+│   └── gradcam.py          # Grad-CAM heatmap generation
+├── frontend/
+│   ├── index.html          # Main UI
+│   ├── style.css           # Styling
+│   └── script.js           # Upload & result handling
+├── static/
+│   └── uploads/            # Temporary image storage (git-ignored)
+├── docs/
+│   ├── GUIDE.md            # Usage guide
+│   └── PAPER.md            # Research paper document
+├── PAPER.md                # Research paper specification & methodology
+├── requirements.txt        # Python dependencies
+└── run.py                  # Entry point
+```
+
+---
+
+## 📄 Research Paper
+Read the complete research paper detailing the dual-transformer architecture, vote-and-average fusion algorithm, and saliency explainability:
+👉 **[Read Paper (PAPER.md)](PAPER.md)**
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Python, Flask, Flask-CORS |
+| ML Models | Hugging Face Transformers (ViT) |
+| Deep Learning | PyTorch, TorchVision |
+| Explainability | Grad-CAM |
+| Image Processing | Pillow, NumPy |
+| Frontend | HTML5, CSS3, Vanilla JavaScript |
+
+---
+
 ## 🚀 Quick Start
 
 1. **Clone the repository:**
