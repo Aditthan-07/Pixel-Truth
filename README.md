@@ -198,6 +198,89 @@ python scripts/benchmark.py --real-dir ./data/real --ai-dir ./data/ai --output r
 
 ---
 
-## 👤 Author
+## How It Works
 
-Created by [Aditthan](https://github.com/Aditthan-07).
+### Ensemble Prediction
+
+Two ViT-based models independently classify the image. Their confidence scores are averaged and a majority vote determines the final verdict:
+
+```
+Image → Model 1 (umm-maybe/AI-image-detector)  ─┐
+                                                  ├─ Majority Vote → Label + Confidence
+Image → Model 2 (Organika/sdxl-detector)        ─┘
+```
+
+### Grad-CAM Explainability
+
+Gradient-weighted Class Activation Mapping (Grad-CAM) computes gradients of the predicted class with respect to the input pixel values. These gradients are used to generate a heatmap overlay — **red regions** indicate areas that most influenced the AI detection.
+
+---
+
+## API Reference
+
+### `POST /predict`
+
+Accepts a multipart image upload and returns the prediction.
+
+**Request**
+
+```
+Content-Type: multipart/form-data
+Body: image=<file>
+```
+
+**Response**
+
+```json
+{
+  "label": "AI Generated",
+  "confidence": 94.73,
+  "gradcam_image": "<base64-encoded PNG>",
+  "original_image": "<base64-encoded PNG>"
+}
+```
+
+**Supported formats:** PNG, JPG, JPEG, WEBP, GIF
+
+---
+
+## Deep Learning Concepts Demonstrated
+
+- Transfer Learning with pre-trained Vision Transformers (ViT)
+- Binary Image Classification (Real vs AI-Generated)
+- Ensemble Learning via multi-model voting
+- Grad-CAM for model interpretability
+- REST API deployment of ML models
+
+---
+
+## Models Used
+
+| Model | Source | Description |
+|---|---|---|
+| `umm-maybe/AI-image-detector` | Hugging Face | ViT fine-tuned on real vs AI-generated images |
+| `Organika/sdxl-detector` | Hugging Face | Specialized detector for SDXL-generated images |
+
+---
+
+## Contributing
+
+Contributions are welcome! Please review our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) prior to opening a pull request.
+
+For reporting security vulnerabilities, please refer to our [Security Policy](SECURITY.md).
+
+For complete REST API contract specifications, view the [OpenAPI 3.0 Documentation](docs/openapi.yaml).
+
+---
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+Built by [Aditthan](https://github.com/Aditthan-07) · Powered by Deep Learning & Hugging Face 🤗
+
+</div>
